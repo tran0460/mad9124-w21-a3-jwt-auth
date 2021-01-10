@@ -57,7 +57,7 @@ DO NOT store the password or the JWT.
 
 ## Logistics
 
-- Clone this repo to your latptop.
+- Fork this repo and then clone it to your laptop.
 - Build the project on your laptop.
 - Test each route with Postman.
 - Make git commits as you complete each requirement

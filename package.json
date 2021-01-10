@@ -1,12 +1,19 @@
 {
-  "name": "a3",
-  "version": "1.0.0",
+  "name": "mad9124-w21-a3-jwt-auth",
+  "version": "0.1.0",
   "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "MAD9124",
+    "W21"
+  ],
   "author": "",
-  "license": "ISC"
+  "contributors": [
+    "Robert McKenney <mckennr@algonquincollege.com>"
+  ],
+  "license": "ISC",
+  "private": true
 }
