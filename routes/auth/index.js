@@ -12,7 +12,6 @@ router.post('/users', sanitizeBody, async (req, res, next) => {
     .save()
     .then(newUser => res.status(201).json(formatResponseData(newUser)))
     .catch(next)
-
 })
 router.post('/tokens', sanitizeBody, async (req, res) => {
   const { email, password } = req.sanitizedBody
