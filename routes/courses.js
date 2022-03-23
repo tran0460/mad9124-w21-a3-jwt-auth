@@ -1,112 +1,117 @@
-const express = require('express')
-const Course = require('../models/Course')
-const router = express.Router()
-const sanitizeBody = require('../middleware/sanitizeBody')
+import createDebug from 'debug'
+import sanitizeBody from '../middleware/sanitizeBody.js'
+import Course from '../models/Course.js'
+import express from 'express'
+import ResourceNotFoundException from '../exceptions/ResourceNotFoundException'
+import authUser from '../middleware/auth'
+import authAdmin from '../middleware/authAdmin'
 
+
+const debug = createDebug('week9:routes:courses')
+const router = express.Router()
 
 router.get('/', async (req, res) => {
-    const courses =  await Course.find()
-    res.json({data: courses.map(course => formatResponseData('courses', course.toObject()))})
+  const collection = await Course.find().populate('owner')
+  res.send({ data: formatResponseData(collection) })
 })
-router.post('/', sanitizeBody, async (req, res) => {
-    let attributes = req.body.data.attributes 
-    delete attributes._id 
-    let newCourse = new Course(attributes)
-    try {
-        await newCourse.save()
-        res.status(201).json({data: formatResponseData('courses', newCourse.toObject())})
-    } catch (err) {
-        res.status(500).send({
-            errors: [
-                {
-                status: '500',
-                title: 'Server error',
-                description: 'Problem saving document to the database.',
-                },
-            ],
-        })
-    }
+
+router.post('/', sanitizeBody, async (req, res, next) => {
+    new Course(req.sanitizeBody)
+    .save()
+    .then(newCourse => res.status(201).json({ data: formatResponseData(newCourse) }))
+    .catch(next)
+//   let newCourse = new Course(req.sanitizedBody)
+//   try {
+//     await newCourse.save()
+//     res.status(201).json({ data: formatResponseData(newCourse) })
+//   } catch (err) {
+//     debug(err)
+//     res.status(500).send({
+//       errors: [
+//         {
+//           status: '500',
+//           title: 'Server error',
+//           description: 'Problem saving document to the database.',
+//         },
+//       ],
+//     })
+//   }
 })
+
 router.get('/:id', async (req, res) => {
-    try {
-        const course = await Course.findById(req.params.id).populate('students')
-        if(!course) {
-            throw new Error('Resource not found')
-        }
-    res.json({data: formatResponseData('courses', course.toObject())})
-    }
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
+  try {
+    const course = await Course.findById(req.params.id).populate('owner')
+    if (!course) throw new ResourceNotFoundException(
+      `we could not find a course with id: ${req.params.id}`
+    )
+    res.json({ data: formatResponseData(course) })
+  } catch (err) {
+    sendResourceNotFound(req, res)
+  }
 })
-router.patch('/:id', sanitizeBody,  async (req, res) => {
-    const { _id, ...attributes } = req.body.data.attributes
+
+const update =
+  (overwrite = false) =>
+  async (req, res) => {
     try {
-        const course = await Course.findByIdAndUpdate(
-            req.params.id, 
-            { _id: req.params.id, ...attributes},
-            {
-                new: true,
-                runValidators: true
-            }
-        )
-        if(!course) {
-            throw new Error('Resource not found')
+      const course = await Course.findByIdAndUpdate(
+        req.params.id,
+        req.sanitizedBody,
+        {
+          new: true,
+          overwrite,
+          runValidators: true,
         }
-        res.json({data: formatResponseData('courses', course.toObject())})
+      )
+      if (!course) throw new Error('Resource not found')
+      res.json({ data: formatResponseData(course) })
+    } catch (err) {
+      sendResourceNotFound(req, res)
     }
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
-})
-router.put('/:id', sanitizeBody, async (req, res) => {
-    const {_id, ...attributes} = req.body.data.attributes
-    try {
-        const course = await Course.findByIdAndUpdate(
-            req.params.id, 
-            {_id: req.params.id, ...attributes},
-            {
-                new: true,
-                overwrite: true,
-                runValidators: true
-            }
-        )
-        console.log(course)
-        if(!course) {
-            throw new Error('Resource not found')
-        }
-        res.json({data: formatResponseData('courses', course.toObject())})
-    }
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
-})
+  }
+router.put('/:id', sanitizeBody, update(true))
+router.patch('/:id', sanitizeBody, update(false))
+
 router.delete('/:id', async (req, res) => {
-    try {
-        const course = await Course.findByIdAndRemove(req.params.id)
-        if (!course) throw new Error('Resource not found')
-        res.json( { data: formatResponseData('courses', course.toObject())} )
-    } catch (error) {
-        sendResourceNotFound(req, res)
-    }
+  try {
+    const course = await Course.findByIdAndRemove(req.params.id)
+    if (!course) throw new Error('Resource not found')
+    res.json({ data: formatResponseData(course) })
+  } catch (err) {
+    sendResourceNotFound(req, res)
+  }
 })
 
-
-function formatResponseData(type, resource) {
-    const {_id, ...attributes} = resource
-    return {type, id: _id, attributes}
+/**
+ * Format the response data object according to JSON:API v1.0
+ * @param {string} type The resource collection name, e.g. 'courses'
+ * @param {Object | Object[]} payload An array or instance object from that collection
+ * @returns
+ */
+function formatResponseData(payload, type = 'courses') {
+  if (payload instanceof Array) {
+    return payload.map((resource) => format(resource))
+  } else {
+    return format(payload)
+  }
+  function format(resource) {
+    const { _id, ...attributes } = resource.toObject()
+    return { type, id: _id, attributes }
+  }
 }
 
 function sendResourceNotFound(req, res) {
-    res.status(404).json({
-        errors: [
-        {
-            status: '404',
-            title: 'Resource does not exist',
-        }
-        ]
-    })
+  res.status(404).send({
+    error: [
+      {
+        status: '404',
+        title: 'Resource does nto exist',
+        description: `We could not find a course with id: ${req.params.id}`,
+      },
+    ],
+  })
 }
 
-module.exports = router
+export default router
+
 
