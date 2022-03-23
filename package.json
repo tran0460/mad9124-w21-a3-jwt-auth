@@ -15,5 +15,12 @@
     "Robert McKenney <mckennr@algonquincollege.com>"
   ],
   "license": "ISC",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "debug": "^4.3.4",
+    "express": "^4.17.3",
+    "mongoose": "^6.2.8",
+    "morgan": "^1.10.0",
+    "xss": "^1.0.11"
+  }
 }
