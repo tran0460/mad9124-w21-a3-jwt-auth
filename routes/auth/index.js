@@ -3,6 +3,7 @@ import sanitizeBody from '../../middleware/sanitizeBody.js'
 import createDebug from 'debug'
 import express from 'express'
 import authenticate from '../../middleware/auth.js'
+import authAdmin from '../../middleware/authAdmin'
 
 const debug = createDebug('week9:routes:auth')
 const router = express.Router()

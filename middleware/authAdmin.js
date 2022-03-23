@@ -10,7 +10,7 @@ export default async function (req, res, next) {
         {
           status: "403",
           title: "Access forbidden",
-          description: "Access restricted to a certain group of users",
+          description: "Only an admin can access this data",
         },
       ],
     });
