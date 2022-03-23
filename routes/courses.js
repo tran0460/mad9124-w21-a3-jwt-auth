@@ -2,16 +2,16 @@ import createDebug from 'debug'
 import sanitizeBody from '../middleware/sanitizeBody.js'
 import Course from '../models/Course.js'
 import express from 'express'
-import ResourceNotFoundException from '../exceptions/ResourceNotFoundException'
-import authUser from '../middleware/auth'
-import authAdmin from '../middleware/authAdmin'
+// import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
+import authUser from '../middleware/auth.js'
+import authAdmin from '../middleware/authAdmin.js'
 
 
-const debug = createDebug('week9:routes:courses')
+const debug = createDebug('a3:routes:courses')
 const router = express.Router()
 
-router.get('/', async (req, res) => {
-  const collection = await Course.find().populate('owner')
+router.get('/', authUser, async (req, res) => {
+  const collection = await Course.find().populate('students')
   res.send({ data: formatResponseData(collection) })
 })
 

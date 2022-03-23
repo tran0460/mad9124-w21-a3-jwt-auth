@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
+import mongoose from 'mongoose';
+
 const schema = new mongoose.Schema({
     firstName: { type: String, required: true, maxlength: 64 },
     lastName: { type: String, required: true, maxlength: 64 },
@@ -6,4 +8,5 @@ const schema = new mongoose.Schema({
     email: { type: String, required: true, maxlength: 512 },
 });
 const Model = mongoose.model("Student", schema);
-module.exports = Model;
+
+export default Model;

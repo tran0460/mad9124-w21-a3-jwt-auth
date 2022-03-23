@@ -1,5 +1,7 @@
-const Student = require("./Student");
-const mongoose = require("mongoose");
+// const Student = require("./Student");
+// const mongoose = require("mongoose");
+import Student from './Student.js'
+import mongoose from 'mongoose';
 const schema = new mongoose.Schema({
     code: { type: String, required: true, maxlength: 16 },
     title: { type: String, required: true, maxlength: 255 },
@@ -10,4 +12,5 @@ const schema = new mongoose.Schema({
     ],
 });
 const Model = mongoose.model("Course", schema);
-module.exports = Model;
+
+export default Model;

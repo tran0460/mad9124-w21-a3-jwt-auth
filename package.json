@@ -2,9 +2,11 @@
   "name": "mad9124-w21-a3-jwt-auth",
   "version": "0.1.0",
   "description": "",
-  "main": "app.js",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DEBUG=MAD9124-W21-EX8-AUTH* nodemon server.js"
   },
   "keywords": [
     "MAD9124",
@@ -17,11 +19,18 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "debug": "^4.3.4",
     "express": "^4.17.3",
+    "express-mongo-sanitize": "^2.2.0",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "mongo-sanitize": "^1.1.0",
     "mongoose": "^6.2.8",
     "mongoose-unique-validator": "^3.0.0",
     "morgan": "^1.10.0",
+    "nodemon": "^2.0.15",
+    "validator": "^13.7.0",
     "xss": "^1.0.11"
   }
 }

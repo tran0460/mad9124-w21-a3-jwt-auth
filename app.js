@@ -2,7 +2,10 @@
 import morgan from 'morgan';
 import express from 'express';
 import sanitizeMongo from 'express-mongo-sanitize';
-import authRouter from './routes/auth/auth'
+import authRouter from './routes/auth/index.js'
+import handleError from "./middleware/errorHandler.js";
+import logError from "./middleware/logErrors.js";
+import courseRouter from './routes/courses.js'
 
 import connectDatabase from './startup/connectDatabase.js'
 connectDatabase()
@@ -15,5 +18,9 @@ app.use(sanitizeMongo())
 
 // routes
 app.use('/auth', authRouter)
+app.use('/courses', courseRouter)
+
+app.use(logError)
+app.use(handleError)
 
 export default app

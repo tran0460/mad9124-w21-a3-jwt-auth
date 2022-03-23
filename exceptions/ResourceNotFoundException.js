@@ -9,4 +9,3 @@ class ResourceNotFoundException extends Error {
     }
 }
 
-new ResourceNotFoundException('some error message')

@@ -2,18 +2,19 @@ import User from '../../models/User.js'
 import sanitizeBody from '../../middleware/sanitizeBody.js'
 import createDebug from 'debug'
 import express from 'express'
-import authenticate from '../../middleware/auth.js'
-import authAdmin from '../../middleware/authAdmin'
+import authUser from '../../middleware/auth.js'
+import authAdmin from '../../middleware/authAdmin.js'
 
-const debug = createDebug('week9:routes:auth')
+const debug = createDebug(':routes:auth')
 const router = express.Router()
 
 router.post('/users', sanitizeBody, async (req, res, next) => {
-    new User(req.sanitizeBody)
+    new User(req.sanitizedBody)
     .save()
     .then(newUser => res.status(201).json(formatResponseData(newUser)))
     .catch(next)
 })
+
 router.post('/tokens', sanitizeBody, async (req, res) => {
   const { email, password } = req.sanitizedBody
   const user = await User.authenticate(email, password)
@@ -33,7 +34,7 @@ router.post('/tokens', sanitizeBody, async (req, res) => {
       formatResponseData({ accessToken: user.generateAuthToken() }, 'tokens')
     )
 })
-router.get('/users/me', authenticate, async (req, res) => {
+router.get('/users/me', authUser, async (req, res) => {
   const user = await User.findById(req.user._id).select('-password -__v')
   res.json(formatResponseData(user))
 })

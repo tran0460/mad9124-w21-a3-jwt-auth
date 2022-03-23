@@ -14,12 +14,15 @@ const schema = new mongoose.Schema({
     maxlength: 512,
     required: true,
     unique: true,
+    set: (value) => value.toLowerCase(),
     validate: {
             validator: (value) => validator.isEmail(value),
             message: (props) => `${props.value} is not a valid email address`,
         }
     },
     password: { type: String, trim: true, maxlength: 70, required: true },
+    isAdmin: { type: Boolean, trim: true, maxlength: 70, required: true, default: false},
+    
     },
     {
         timestamps: true
