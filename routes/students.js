@@ -1,8 +1,11 @@
 import express from 'express';
 import Student from '../models/Student.js'
 import sanitizeBody from '../middleware/sanitizeBody.js'
+import authUser from '../middleware/auth.js'
+import authAdmin from '../middleware/authAdmin.js'
 
 const router = express.Router()
+router.use('/', authUser, sanitizeBody)
 
 router.get('/', async (req, res) => {
     const students =  await Student.find()
