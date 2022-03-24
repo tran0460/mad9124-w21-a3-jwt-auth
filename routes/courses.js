@@ -15,30 +15,14 @@ router.get('/', authUser, async (req, res) => {
   res.send({ data: formatResponseData(collection) })
 })
 
-router.post('/', sanitizeBody, async (req, res, next) => {
+router.post('/', authAdmin, sanitizeBody, async (req, res, next) => {
     new Course(req.sanitizeBody)
     .save()
     .then(newCourse => res.status(201).json({ data: formatResponseData(newCourse) }))
     .catch(next)
-//   let newCourse = new Course(req.sanitizedBody)
-//   try {
-//     await newCourse.save()
-//     res.status(201).json({ data: formatResponseData(newCourse) })
-//   } catch (err) {
-//     debug(err)
-//     res.status(500).send({
-//       errors: [
-//         {
-//           status: '500',
-//           title: 'Server error',
-//           description: 'Problem saving document to the database.',
-//         },
-//       ],
-//     })
-//   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authUser, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id).populate('owner')
     if (!course) throw new ResourceNotFoundException(
@@ -69,10 +53,10 @@ const update =
       sendResourceNotFound(req, res)
     }
   }
-router.put('/:id', sanitizeBody, update(true))
-router.patch('/:id', sanitizeBody, update(false))
+router.put('/:id', authAdmin, sanitizeBody, update(true))
+router.patch('/:id', authAdmin, sanitizeBody, update(false))
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authAdmin, async (req, res) => {
   try {
     const course = await Course.findByIdAndRemove(req.params.id)
     if (!course) throw new Error('Resource not found')

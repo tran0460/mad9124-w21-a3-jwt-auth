@@ -34,6 +34,7 @@ schema.methods.generateAuthToken = function () {
     return jwt.sign(payload, 'superSecretKey')
 }
 
+
 schema.methods.toJSON = function () {
     const obj = this.toObject()
     delete obj.password

@@ -14,7 +14,7 @@ router.post('/', sanitizeBody, async (req, res) => {
     let newStudent = new Student(attributes)
     try {
         await newStudent.save()
-        res.status(201).json({data: formatResponseData('people', newStudent.toObject())})
+        res.status(201).json({data: formatResponseData('student', newStudent.toObject())})
     } catch (err) {
         res.status(500).send({
             errors: [
@@ -33,7 +33,7 @@ router.get('/:id', async (req, res) => {
         if(!student) {
             throw new Error('Resource not found')
         }
-    res.json({data: formatResponseData('people', student.toObject())})
+    res.json({data: formatResponseData('student', student.toObject())})
     }
     catch (error) {
         sendResourceNotFound(req, res)
@@ -53,7 +53,7 @@ router.patch('/:id', sanitizeBody, async (req, res) => {
         if(!student) {
             throw new Error('Resource not found')
         }
-        res.json({data: formatResponseData('people', student.toObject())})
+        res.json({data: formatResponseData('student', student.toObject())})
     }
     catch (error) {
         sendResourceNotFound(req, res)
@@ -74,7 +74,7 @@ router.put('/:id', sanitizeBody, async (req, res) => {
         if(!student) {
             throw new Error('Resource not found')
         }
-        res.json({data: formatResponseData('people', student.toObject())})
+        res.json({data: formatResponseData('student', student.toObject())})
 }
     catch (error) {
         sendResourceNotFound(req, res)
@@ -84,7 +84,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const student = await Student.findByIdAndRemove(req.params.id)
         if (!student) throw new Error('Resource not found')
-        res.json( { data: formatResponseData('people', student.toObject())} )
+        res.json( { data: formatResponseData('student', student.toObject())} )
     } catch (error) {
         sendResourceNotFound(req, res)
     }
