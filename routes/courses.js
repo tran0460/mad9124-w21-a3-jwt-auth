@@ -10,21 +10,23 @@ import authAdmin from '../middleware/authAdmin.js'
 const debug = createDebug('a3:routes:courses')
 const router = express.Router()
 
+router.use("/", sanitizeBody, authUser)
+
 router.get('/', authUser, async (req, res) => {
   const collection = await Course.find().populate('students')
   res.send({ data: formatResponseData(collection) })
 })
 
-router.post('/', authAdmin, sanitizeBody, async (req, res, next) => {
+router.post('/', authAdmin, async (req, res, next) => {
     new Course(req.sanitizeBody)
     .save()
     .then(newCourse => res.status(201).json({ data: formatResponseData(newCourse) }))
     .catch(next)
 })
 
-router.get('/:id', authUser, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).populate('owner')
+    const course = await Course.findById(req.params.id).populate('students')
     if (!course) throw new ResourceNotFoundException(
       `we could not find a course with id: ${req.params.id}`
     )
