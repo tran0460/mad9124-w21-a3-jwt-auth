@@ -1,8 +1,8 @@
-const express = require('express')
-const Student = require('../models/Student')
-const router = express.Router()
-const sanitizeBody = require('../middleware/sanitizeBody')
+import express from 'express';
+import Student from '../models/Student.js'
+import sanitizeBody from '../middleware/sanitizeBody.js'
 
+const router = express.Router()
 
 router.get('/', async (req, res) => {
     const students =  await Student.find()
@@ -106,4 +106,5 @@ function sendResourceNotFound(req, res) {
         ]
     })
 }
-module.exports = router
+
+export default router
