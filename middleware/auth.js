@@ -18,7 +18,7 @@ export default function (req, res, next) {
         {
             title: 'Authentication failed!',
             status: 401,
-            description: 'Missing bearer token!',
+            description: 'You are not logged in! You need an account to access this info',
         },
     ],
     })
