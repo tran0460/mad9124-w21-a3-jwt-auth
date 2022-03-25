@@ -4,6 +4,7 @@ import createDebug from 'debug'
 import express from 'express'
 import authUser from '../../middleware/auth.js'
 import authAdmin from '../../middleware/authAdmin.js'
+import AuthAttempt from '../../models/AuthenticationAttempt.js'
 
 const debug = createDebug(':routes:auth')
 const router = express.Router()
@@ -29,10 +30,18 @@ router.post('/tokens', sanitizeBody, async (req, res) => {
     })
   }
   res
-    .status(201)
-    .json(
-      formatResponseData({ accessToken: user.generateAuthToken() }, 'tokens')
+  .status(201)
+  .json(
+    formatResponseData({ accessToken: user.generateAuthToken() }, 'tokens')
     )
+    let attemptDetails = {
+      username: `${email.split('@')[0]}`,
+      ipAddress: req.ip,
+      didSucceed: user ? true : false,
+      createdAt: Date.now(),
+    }
+    let attempt = new AuthAttempt (attemptDetails)
+    await attempt.save() 
 })
 router.get('/users/me', authUser, async (req, res) => {
   const user = await User.findById(req.user._id).select('-password -__v')
