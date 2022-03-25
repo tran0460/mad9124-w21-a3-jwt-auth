@@ -1,113 +1,101 @@
-import express from 'express';
-import Student from '../models/Student.js'
+import createDebug from 'debug'
 import sanitizeBody from '../middleware/sanitizeBody.js'
+import Student from '../models/Student.js'
+import express from 'express'
+// import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 import authUser from '../middleware/auth.js'
 import authAdmin from '../middleware/authAdmin.js'
 
+
+const debug = createDebug('a3:routes:students')
 const router = express.Router()
-router.use('/', authUser, sanitizeBody)
 
-router.get('/', async (req, res) => {
-    const students =  await Student.find()
-    res.json({data: students.map(student => formatResponseData('students', student.toObject()))})
+router.use('/', sanitizeBody, authUser)
+
+router.get('/', authUser, async (req, res) => {
+  const collection = await Student.find()
+  res.send({ data: formatResponseData(collection) })
 })
-router.post('/', sanitizeBody, async (req, res) => {
-    let attributes = req.body.data.attributes 
-    delete attributes._id 
-    let newStudent = new Student(attributes)
-    try {
-        await newStudent.save()
-        res.status(201).json({data: formatResponseData('student', newStudent.toObject())})
-    } catch (err) {
-        res.status(500).send({
-            errors: [
-                {
-                status: '500',
-                title: 'Server error',
-                description: 'Problem saving document to the database.',
-                },
-            ],
-        })
-    }
+
+router.post('/', authAdmin, async (req, res, next) => {
+    new Student(req.sanitizedBody)
+    .save()
+    .then(newStudent => res.status(201).json({ data: formatResponseData(newStudent) }))
+    .catch(next)
 })
+
 router.get('/:id', async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.id)
-        if(!student) {
-            throw new Error('Resource not found')
-        }
-    res.json({data: formatResponseData('student', student.toObject())})
-    }
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
-}) 
-router.patch('/:id', sanitizeBody, async (req, res) => {
-    const {_id, ...attributes} = req.body.data.attributes
-    try {
-        const student = await Student.findByIdAndUpdate(
-            req.params.id, 
-            {_id: req.params.id, ...attributes},
-            {
-                new: true,
-                runValidators: true
-            }
-        )
-        if(!student) {
-            throw new Error('Resource not found')
-        }
-        res.json({data: formatResponseData('student', student.toObject())})
-    }
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
-})
-router.put('/:id', sanitizeBody, async (req, res) => {
-    const {_id, ...attributes} = req.body.data.attributes
-    try {
-        const student = await Student.findByIdAndUpdate(
-            req.params.id, 
-            {_id: req.params.id, ...attributes},
-            {
-                new: true,
-                overwrite: true,
-                runValidators: true
-            }
-        )
-        if(!student) {
-            throw new Error('Resource not found')
-        }
-        res.json({data: formatResponseData('student', student.toObject())})
-}
-    catch (error) {
-        sendResourceNotFound(req, res)
-    }
-})
-router.delete('/:id', async (req, res) => {
-    try {
-        const student = await Student.findByIdAndRemove(req.params.id)
-        if (!student) throw new Error('Resource not found')
-        res.json( { data: formatResponseData('student', student.toObject())} )
-    } catch (error) {
-        sendResourceNotFound(req, res)
-    }
+  try {
+    const student = await Student.findById(req.params.id).populate('students')
+    if (!student) throw new ResourceNotFoundException(
+      `we could not find a student with id: ${req.params.id}`
+    )
+    res.json({ data: formatResponseData(student) })
+  } catch (err) {
+    sendResourceNotFound(req, res)
+  }
 })
 
+const update =
+  (overwrite = false) =>
+  async (req, res) => {
+    try {
+      const student = await Student.findByIdAndUpdate(
+        req.params.id,
+        req.sanitizedBody,
+        {
+          new: true,
+          overwrite,
+          runValidators: true,
+        }
+      )
+      if (!student) throw new Error('Resource not found')
+      res.json({ data: formatResponseData(student) })
+    } catch (err) {
+      sendResourceNotFound(req, res)
+    }
+  }
+router.put('/:id', authAdmin, sanitizeBody, update(true))
+router.patch('/:id', authAdmin, sanitizeBody, update(false))
 
-function formatResponseData(type, resource) {
-    const {_id, ...attributes} = resource
-    return {type, id: _id, attributes}
+router.delete('/:id', authAdmin, async (req, res) => {
+  try {
+    const student = await Student.findByIdAndRemove(req.params.id)
+    if (!student) throw new Error('Resource not found')
+    res.json({ data: formatResponseData(student) })
+  } catch (err) {
+    sendResourceNotFound(req, res)
+  }
+})
+
+/**
+ * Format the response data object according to JSON:API v1.0
+ * @param {string} type The resource collection name, e.g. 'students'
+ * @param {Object | Object[]} payload An array or instance object from that collection
+ * @returns
+ */
+function formatResponseData(payload, type = 'students') {
+  if (payload instanceof Array) {
+    return payload.map((resource) => format(resource))
+  } else {
+    return format(payload)
+  }
+  function format(resource) {
+    const { _id, ...attributes } = resource.toObject()
+    return { type, id: _id, attributes }
+  }
 }
 
 function sendResourceNotFound(req, res) {
-    res.status(404).json({
-        errors: [
-        {
-            status: '404',
-            title: 'Resource does not exist',
-        }
-        ]
-    })
+  res.status(404).send({
+    error: [
+      {
+        status: '404',
+        title: 'Resource does nto exist',
+        description: `We could not find a student with id: ${req.params.id}`,
+      },
+    ],
+  })
 }
 
 export default router
