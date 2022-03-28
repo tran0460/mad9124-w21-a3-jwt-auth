@@ -25,7 +25,7 @@ router.post('/', authAdmin, async (req, res, next) => {
     .catch(next)
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const course = await Course.findById(req.params.id).populate('students')
     if (!course) throw new ResourceNotFoundException(
@@ -33,7 +33,7 @@ router.get('/:id', async (req, res) => {
     )
     res.json({ data: formatResponseData(course) })
   } catch (err) {
-    sendResourceNotFound(req, res)
+    next(err);
   }
 })
 
@@ -50,7 +50,9 @@ const update =
           runValidators: true,
         }
       )
-      if (!course) throw new Error('Resource not found')
+      if (!course) throw new ResourceNotFoundException(
+        `we could not find a course with id: ${req.params.id}`
+      )
       res.json({ data: formatResponseData(course) })
     } catch (err) {
       sendResourceNotFound(req, res)
@@ -59,13 +61,15 @@ const update =
 router.put('/:id', authAdmin, sanitizeBody, update(true))
 router.patch('/:id', authAdmin, sanitizeBody, update(false))
 
-router.delete('/:id', authAdmin, async (req, res) => {
+router.delete('/:id', authAdmin, async (req, res, next) => {
   try {
     const course = await Course.findByIdAndRemove(req.params.id)
-    if (!course) throw new Error('Resource not found')
+    if (!course) throw new ResourceNotFoundException(
+      `we could not find a course with id: ${req.params.id}`
+    )
     res.json({ data: formatResponseData(course) })
   } catch (err) {
-    sendResourceNotFound(req, res)
+    next(err)
   }
 })
 
@@ -87,17 +91,6 @@ function formatResponseData(payload, type = 'courses') {
   }
 }
 
-function sendResourceNotFound(req, res) {
-  res.status(404).send({
-    error: [
-      {
-        status: '404',
-        title: 'Resource does nto exist',
-        description: `We could not find a course with id: ${req.params.id}`,
-      },
-    ],
-  })
-}
 
 export default router
 
