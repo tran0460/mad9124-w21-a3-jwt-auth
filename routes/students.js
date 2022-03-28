@@ -2,9 +2,9 @@ import createDebug from 'debug'
 import sanitizeBody from '../middleware/sanitizeBody.js'
 import Student from '../models/Student.js'
 import express from 'express'
-// import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 import authUser from '../middleware/auth.js'
 import authAdmin from '../middleware/authAdmin.js'
+import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 
 
 const debug = createDebug('a3:routes:students')
@@ -24,7 +24,7 @@ router.post('/', authAdmin, async (req, res, next) => {
     .catch(next)
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id).populate('students')
     if (!student) throw new ResourceNotFoundException(
@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
     )
     res.json({ data: formatResponseData(student) })
   } catch (err) {
-    sendResourceNotFound(req, res)
+    next(err)
   }
 })
 

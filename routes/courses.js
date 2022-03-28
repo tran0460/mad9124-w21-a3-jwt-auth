@@ -5,7 +5,7 @@ import express from 'express'
 // import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 import authUser from '../middleware/auth.js'
 import authAdmin from '../middleware/authAdmin.js'
-import sendResourceNotFound from '../exceptions/sendResourceNotFound.js'
+import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 
 
 const debug = createDebug('a3:routes:courses')
