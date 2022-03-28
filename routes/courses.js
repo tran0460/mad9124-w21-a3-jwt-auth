@@ -39,7 +39,7 @@ router.get('/:id', async (req, res, next) => {
 
 const update =
   (overwrite = false) =>
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const course = await Course.findByIdAndUpdate(
         req.params.id,
@@ -55,7 +55,7 @@ const update =
       )
       res.json({ data: formatResponseData(course) })
     } catch (err) {
-      sendResourceNotFound(req, res)
+      next(err)
     }
   }
 router.put('/:id', authAdmin, sanitizeBody, update(true))

@@ -38,7 +38,7 @@ router.get('/:id', async (req, res, next) => {
 
 const update =
   (overwrite = false) =>
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const student = await Student.findByIdAndUpdate(
         req.params.id,
@@ -49,22 +49,26 @@ const update =
           runValidators: true,
         }
       )
-      if (!student) throw new Error('Resource not found')
+      if (!student) throw new ResourceNotFoundException(
+        `we could not find a student with id: ${req.params.id}`
+      )
       res.json({ data: formatResponseData(student) })
     } catch (err) {
-      sendResourceNotFound(req, res)
+      next(err)
     }
   }
 router.put('/:id', authAdmin, sanitizeBody, update(true))
 router.patch('/:id', authAdmin, sanitizeBody, update(false))
 
-router.delete('/:id', authAdmin, async (req, res) => {
+router.delete('/:id', authAdmin, async (req, res, next) => {
   try {
     const student = await Student.findByIdAndRemove(req.params.id)
-    if (!student) throw new Error('Resource not found')
+    if (!student) throw new ResourceNotFoundException(
+      `we could not find a student with id: ${req.params.id}`
+    )
     res.json({ data: formatResponseData(student) })
   } catch (err) {
-    sendResourceNotFound(req, res)
+    next(err)
   }
 })
 
@@ -84,18 +88,6 @@ function formatResponseData(payload, type = 'students') {
     const { _id, ...attributes } = resource.toObject()
     return { type, id: _id, attributes }
   }
-}
-
-function sendResourceNotFound(req, res) {
-  res.status(404).send({
-    error: [
-      {
-        status: '404',
-        title: 'Resource does nto exist',
-        description: `We could not find a student with id: ${req.params.id}`,
-      },
-    ],
-  })
 }
 
 export default router
