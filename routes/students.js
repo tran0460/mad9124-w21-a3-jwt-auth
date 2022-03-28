@@ -7,7 +7,7 @@ import authAdmin from '../middleware/authAdmin.js'
 import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.js'
 
 
-const debug = createDebug('a3:routes:students')
+const debug = createDebug('mad9124-w21-a3-jwt-auth:routes:students')
 const router = express.Router()
 
 router.use('/', sanitizeBody, authUser)
