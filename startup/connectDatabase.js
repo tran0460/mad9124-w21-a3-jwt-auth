@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import createDebug from 'debug'
-const debug = createDebug('mad9124-w21-a3-jwt-auth:db')
+const debug = createDebug('MAD9124-W21-A3-JWT-AUTH:db')
 
 export default function () {
   mongoose

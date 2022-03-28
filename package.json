@@ -6,14 +6,15 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "DEBUG=MAD9124-W21-EX8-AUTH* nodemon server.js"
+    "start": "DEBUG=MAD9124-W21-A3-JWT-AUTH* nodemon server.js"
   },
   "keywords": [
     "MAD9124",
     "W21"
   ],
-  "author": "",
+  "author": "Son Tran",
   "contributors": [
+    "Son Tran <tran0460@algonquinlive.com>",
     "Robert McKenney <mckennr@algonquincollege.com>"
   ],
   "license": "ISC",
