@@ -10,14 +10,14 @@ import ResourceNotFoundException from '../exceptions/ResourceNotFoundException.j
 const debug = createDebug('mad9124-w21-a3-jwt-auth:routes:students')
 const router = express.Router()
 
-router.use('/', sanitizeBody, authUser)
+router.use('/', authUser)
 
 router.get('/', authUser, async (req, res) => {
   const collection = await Student.find()
   res.send({ data: formatResponseData(collection) })
 })
 
-router.post('/', authAdmin, async (req, res, next) => {
+router.post('/', sanitizeBody, authAdmin, async (req, res, next) => {
     new Student(req.sanitizedBody)
     .save()
     .then(newStudent => res.status(201).json({ data: formatResponseData(newStudent) }))
